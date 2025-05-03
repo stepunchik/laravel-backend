@@ -44,7 +44,6 @@ class AuthController extends Controller
 	{
 		$user = $request->user();
 		$user->currentAccessToken()->delete();
-		Auth::logout();
 		return response('', 204);
 	}
 }

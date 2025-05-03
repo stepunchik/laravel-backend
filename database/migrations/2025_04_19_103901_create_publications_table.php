@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('text');
             $table->string('image');
-            $table->boolean('moderation_state');
+            $table->boolean('moderation_state')->default(false);
             $table->foreignId('user_id')
                   ->constrained('users', 'id')
                   ->onUpdate('cascade')
