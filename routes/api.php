@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\API\FeedController;
+use App\Http\Controllers\API\PublicationsController;
+use App\Http\Controllers\API\GradesController;
+use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\ConversationsController;
+use App\Http\Controllers\API\MessagesController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -17,23 +21,34 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/feed', [FeedController::class, 'index']);
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-
-    Route::apiResource('/users', UserController::class);
-});
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/signup', [AuthController::class, 'signup']);
 
-Route::resource('/conversations', ConversationsController::class);
+Route::get('/publications/guest', [PublicationsController::class, 'guestFeed']);
 
-Route::get('/profile', [ProfileController::class, 'index']);
+Route::get('/users/top', [UserController::class, 'getTop']);
+Route::get('/users/last-week-top', [UserController::class, 'getLastWeekTop']);
+Route::get('/users/{user}', [UserController::class, 'show']);
+Route::get('/publications/{user}', [PublicationsController::class, 'getUserPublications']);
 
-Route::resource('/article', ArticleController::class);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/publications', [PublicationsController::class, 'index']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    
+    Route::resource('/conversations', ConversationsController::class)->except('update', 'create', 'edit');
+
+    Route::resource('/messages', MessagesController::class)->only('store', 'destroy');
+    
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    
+    Route::post('/publications/{publication}/like', [GradesController::class, 'like']);
+    Route::post('/publications/{publication}/dislike', [GradesController::class, 'dislike']);
+    Route::patch('/publications/{publication}/grade', [GradesController::class, 'update']);
+    Route::delete('publications/{publication}/grade', [GradesController::class, 'destroy']);
+});
+
+
 

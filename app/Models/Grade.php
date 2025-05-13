@@ -6,21 +6,23 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Publication extends Model
+class Grade extends Model
 {
     use HasFactory;
 
-    protected $table = 'publications';
+    protected $table = 'grades';
 
     protected $fillable = [
+        'publication_id',
         'user_id',
-        'title',
-        'text',
-        'image',
-        'moderation_state'
+        'value',
     ];
 
     public function user(): BelongsTo {
         return $this->belongsTo(User::class);
+    }
+
+    public function publication(): BelongsTo {
+        return $this->belongsTo(Publication::class);
     }
 }

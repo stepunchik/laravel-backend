@@ -6,21 +6,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Publication extends Model
+class Message extends Model
 {
     use HasFactory;
 
-    protected $table = 'publications';
+    protected $table = 'messages';
 
     protected $fillable = [
-        'user_id',
-        'title',
+        'sender_id',
+        'conversation_id',
         'text',
-        'image',
-        'moderation_state'
     ];
 
-    public function user(): BelongsTo {
-        return $this->belongsTo(User::class);
+    public function conversation(): BelongsTo {
+        return $this->belongsTo(Conversation::class);
     }
 }
