@@ -30,15 +30,15 @@ Route::get('/publications/guest', [PublicationsController::class, 'guestFeed']);
 Route::get('/users/top', [UserController::class, 'getTop']);
 Route::get('/users/last-week-top', [UserController::class, 'getLastWeekTop']);
 Route::get('/users/{user}', [UserController::class, 'show']);
-Route::get('/publications/{user}', [PublicationsController::class, 'getUserPublications']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/publications', [PublicationsController::class, 'index']);
+    Route::get('/publications/{user}', [PublicationsController::class, 'getUserPublications']);
+    Route::apiResource('/publications', PublicationsController::class)->except('show');
     Route::post('/logout', [AuthController::class, 'logout']);
     
-    Route::resource('/conversations', ConversationsController::class)->except('update', 'create', 'edit');
+    Route::apiResource('/conversations', ConversationsController::class)->except('update', 'create', 'edit');
 
-    Route::resource('/messages', MessagesController::class)->only('store', 'destroy');
+    Route::apiResource('/messages', MessagesController::class)->only('store', 'destroy');
     
     Route::get('/user', function (Request $request) {
         return $request->user();

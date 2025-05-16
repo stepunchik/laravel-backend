@@ -11,8 +11,8 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller {
     public function getTop() {
-        $M = 1;
-        
+        $M = 5;
+
         $averageRatingOfAllPublications = DB::table('grades')
             ->select(DB::raw('AVG(value) as C'))
             ->value('C');
@@ -20,18 +20,34 @@ class UserController extends Controller {
         $users = DB::table('users')
             ->join('publications', 'users.id', '=', 'publications.user_id')
             ->leftJoin('grades', 'publications.id', '=', 'grades.publication_id')
-            ->select('users.id', 'users.name', 'users.image', DB::raw('COUNT(grades.id) as V'), DB::raw('AVG(grades.value) as R'))
-            ->groupBy('users.id', 'users.name')
+            ->select(
+                'users.id',
+                'users.name',
+                'users.image',
+                DB::raw('COUNT(grades.id) as V'),
+                DB::raw('SUM(grades.value) as likes'),
+                DB::raw('AVG(grades.value) as R')
+            )
+            ->groupBy('users.id', 'users.name', 'users.image')
             ->get();
 
         $usersWithRatings = $users->map(function ($user) use ($M, $averageRatingOfAllPublications) {
             $V = $user->V;
             $R = $user->R ?? 0;
-            $C = $averageRatingOfAllPublications;
-            
-            $rating = (($V / ($V + $M)) * $R) + (($M / ($M + $V)) * $C);
-            
-            $user->rating = round($rating, 3);
+            $C = $averageRatingOfAllPublications ?? 0;
+
+            $rating = (($V / ($V + $M)) * $R) + (($M / ($V + $M)) * $C);
+
+            $percent = $V > 0 ? round(($user->likes / $V) * 100) : 0;
+
+            $user->rating = round($rating, 4);
+            $user->percent = $percent;
+            $user->votes = $V;
+
+            unset($user->R);
+            unset($user->V);
+            unset($user->likes);
+
             return $user;
         });
 
@@ -41,7 +57,7 @@ class UserController extends Controller {
     }
 
     public function getLastWeekTop() {
-        $M = 1;
+        $M = 5;
         $weekAgo = now()->subWeek();
 
         $averageRatingOfLastWeek = DB::table('grades')
@@ -60,6 +76,7 @@ class UserController extends Controller {
                 'users.name',
                 'users.image',
                 DB::raw('COUNT(grades.id) as V'),
+                DB::raw('SUM(grades.value) as likes'),
                 DB::raw('AVG(grades.value) as R')
             )
             ->groupBy('users.id', 'users.name', 'users.image')
@@ -72,7 +89,16 @@ class UserController extends Controller {
 
             $rating = (($V / ($V + $M)) * $R) + (($M / ($V + $M)) * $C);
 
-            $user->rating = round($rating, 3);
+            $percent = $V > 0 ? round(($user->likes / $V) * 100) : 0;
+
+            $user->rating = round($rating, 4);
+            $user->percent = $percent;
+            $user->votes = $V;
+
+            unset($user->R);
+            unset($user->V);
+            unset($user->likes);
+
             return $user;
         });
 
