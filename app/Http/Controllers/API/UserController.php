@@ -51,7 +51,7 @@ class UserController extends Controller {
             return $user;
         });
 
-        $sortedUsers = $usersWithRatings->sortByDesc('rating')->values();
+        $sortedUsers = $usersWithRatings->sortByDesc('rating')->take(5)->values();
 
         return response()->json(['top' => $sortedUsers]);
     }
@@ -102,7 +102,7 @@ class UserController extends Controller {
             return $user;
         });
 
-        $sortedUsers = $usersWithRatings->sortByDesc('rating')->values();
+        $sortedUsers = $usersWithRatings->sortByDesc('rating')->take(5)->values();
 
         return response()->json(['last_week_top' => $sortedUsers]);
     }

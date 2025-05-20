@@ -11,7 +11,7 @@ class MessageRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,8 @@ class MessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'text' => 'required|max:255',
+            'conversation_id' => 'required'
         ];
     }
 }

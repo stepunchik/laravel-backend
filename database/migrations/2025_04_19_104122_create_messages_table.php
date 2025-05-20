@@ -17,7 +17,7 @@ return new class extends Migration
                   ->constrained('users', 'id')
                   ->onUpdate('cascade')
                   ->onDelete('cascade');
-            $table->foreignId('convestation_id')
+            $table->foreignId('conversation_id')
                   ->constrained('conversations', 'id')
                   ->onUpdate('cascade')
                   ->onDelete('cascade');

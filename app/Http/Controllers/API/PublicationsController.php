@@ -34,16 +34,23 @@ class PublicationsController extends Controller {
         return response()->json(['publications' => $publications, 'gradedPublications' => $gradedPublications]);
     }
 
+	public function show(Publication $publication) {
+		return response()->json(['publication' => $publication]);
+	}
+
     public function getUserPublications(User $user) {
-		$userId = Auth::id();
+		$publications = $user->publications;
 
 		$gradedPublications = [];
 
-		if ($userId) {
-			$gradedPublications = Grade::where('user_id', $userId)->get();
+		if (Auth::check()) {
+			$gradedPublications = Grade::where('user_id', Auth::id())->get();
 		}
 
-        return response()->json(['publications' => $user->publications, 'gradedPublications' => $gradedPublications]);
+		return response()->json([
+			'publications' => $publications,
+			'gradedPublications' => $gradedPublications
+		]);
     }
 
     public function store(PublicationRequest $request) {

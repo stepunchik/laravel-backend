@@ -14,4 +14,4 @@ use App\Broadcasting\ConversationChannel;
 |
 */
 
-Broadcast::channel('conversation', ConversationChannel::class);
+Broadcast::channel('conversation.{conversationId}', ConversationChannel::class);
