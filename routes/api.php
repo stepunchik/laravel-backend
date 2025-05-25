@@ -29,19 +29,22 @@ Route::get('/publications/guest', [PublicationsController::class, 'guestFeed']);
 Route::get('/users/top', [UserController::class, 'getTop']);
 Route::get('/users/last-week-top', [UserController::class, 'getLastWeekTop']);
 Route::get('/users/{user}', [UserController::class, 'show']);
-Route::get('/publications/{user}', [PublicationsController::class, 'getUserPublications']);
+Route::get('/users/{user}/publications', [PublicationsController::class, 'getUserPublications']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('/publications', PublicationsController::class);
+    Route::apiResource('/publications', PublicationsController::class)->except('update');
+    Route::post('publications/{publication}', [PublicationsController::class, 'update']);
     Route::post('/logout', [AuthController::class, 'logout']);
     
     Route::apiResource('/conversations', ConversationsController::class)->except('update', 'create', 'edit');
-
+    
     Route::apiResource('/messages', MessagesController::class)->only('store', 'destroy');
+    Route::post('/messages/{message}', [MessagesController::class, 'update']);
     
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    Route::post('/users/{user}', [UserController::class, 'update']);
     
     Route::post('/publications/{publication}/like', [GradesController::class, 'like']);
     Route::post('/publications/{publication}/dislike', [GradesController::class, 'dislike']);

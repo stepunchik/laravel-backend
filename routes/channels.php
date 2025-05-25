@@ -15,3 +15,7 @@ use App\Broadcasting\ConversationChannel;
 */
 
 Broadcast::channel('conversation.{conversationId}', ConversationChannel::class);
+
+Broadcast::channel('user.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
+});

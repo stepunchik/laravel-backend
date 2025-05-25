@@ -8,6 +8,7 @@ use App\Models\Publication;
 use App\Models\User;
 use App\Models\Grade;
 use App\Http\Requests\PublicationRequest;
+use App\Http\Requests\PublicationEditRequest;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class PublicationsController extends Controller {
 			? Grade::where('user_id', $userId)->get()
 			: [];
 
-        return response()->json(['publications' => $publications, 'gradedPublications' => $gradedPublications]);
+        return response()->json(['user_id' => $userId, 'publications' => $publications, 'gradedPublications' => $gradedPublications]);
     }
 
 	public function show(Publication $publication) {
@@ -41,11 +42,7 @@ class PublicationsController extends Controller {
     public function getUserPublications(User $user) {
 		$publications = $user->publications;
 
-		$gradedPublications = [];
-
-		if (Auth::check()) {
-			$gradedPublications = Grade::where('user_id', Auth::id())->get();
-		}
+		$gradedPublications = Grade::where('user_id', Auth::id())->get();
 
 		return response()->json([
 			'publications' => $publications,
@@ -65,41 +62,43 @@ class PublicationsController extends Controller {
 			$imageUrl = URL::to('/') . Storage::url($path);
 		}
 		
-		Publication::create([
+		$publication = Publication::create([
 			'title' => $validatedData['title'],
             'text' => $validatedData['text'],
 			'image' => $imageUrl,
 			'user_id' => $userId
 		]);
 		
-		return; 
+		return response()->json(['publication' => $publication]);
     }
 	
-	public function update(PublicationRequest $request, Publication $publication) {
+	public function update(PublicationEditRequest $request, Publication $publication) {
 		$validatedData = $request->validated();
 		
 		if ($request->hasFile('image')) {
 			if ($publication->image) {
-				Storage::delete('public/' . $publication['image']);
+				$deletingPath = substr($publication['image'], 29, strlen($publication['image']));
+				Storage::delete('public/' . $deletingPath);
 			}
 
-			$imagePath = $request->file('image')->store('publications', 'public');
-			$validatedData['image'] = $imagePath;
+			$path = $request->file('image')->store('publications', 'public');
+			$imageUrl = URL::to('/') . Storage::url($path);
+			$validatedData['image'] = $imageUrl;
 		} else {
 			$validatedData['image'] = $publication->image;
 		}
 
 		$publication->update($validatedData);
 		
-		return; 
+		return response()->json(['publication' => $publication]);
 	}
 	
 	public function destroy(Publication $publication) {		
-		Storage::delete('public/' . $publication['image']);
+		$deletingPath = substr($publication['image'], 29, strlen($publication['image']));
+		Storage::delete('public/' . $deletingPath);
 
 		$publication->delete();
 		
-		return;
 	}
 
 }

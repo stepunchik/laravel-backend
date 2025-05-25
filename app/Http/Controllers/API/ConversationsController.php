@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Requests\ConversationRequest;
 
 use App\Models\Conversation;
+use App\Models\Message;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
@@ -15,13 +16,38 @@ class ConversationsController extends Controller
     public function index() {
         $userId = Auth::id();
 
-        $conversations = Conversation::where('first_user', $userId)->get();
+        $conversations = Conversation::with('latestMessage')
+            ->where(function ($query) use ($userId) {
+                $query->where('first_user', $userId)
+                    ->orWhere('second_user', $userId);
+            })
+            ->get();
 
-        return response()->json(['conversations' => $conversations]);
+        $sorted = $conversations->sortByDesc(function ($conversation) {
+            return optional($conversation->latestMessage)->created_at;
+        })->values();
+
+        $unreadMessages = $sorted->mapWithKeys(function ($conversation) use ($userId) {
+            $unreadCount = $conversation->messages
+                ->where('is_read', false)
+                ->where('sender_id', '!=', $userId)
+                ->count();
+
+            return [$conversation->id => $unreadCount];
+        });
+
+        return response()->json(['conversations' => $sorted, 'unread_messages' => $unreadMessages]);
     }
 
     public function show(Conversation $conversation) {
-        return response()->json(['conversation' => $conversation, 'messages' => $conversation->messages]);
+        $userId = Auth::id();
+
+        $conversation->messages()
+                ->where('is_read', false)
+                ->where('sender_id', '!=', $userId)
+                ->update(['is_read' => true]);
+
+        return response()->json(['conversation' => $conversation, 'messages' => $conversation->messages()->orderBy('created_at')->get()]);
     }
 
     public function store(ConversationRequest $request) {
