@@ -9,6 +9,7 @@ use App\Http\Requests\LoginRequest;
 
 use App\Models\User;
 
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -27,15 +28,14 @@ class AuthController extends Controller
 	
 	public function login(LoginRequest $request) 
 	{
-		$credentials = $request->validated();
+		$user = User::where('email', $request->email)->first();
 		
-		if(!Auth::attempt($credentials)) {
+		if(!$user || !Hash::check($request->password, $user->password)) {
 			return response([
                 'message' => 'Неверные данные для входа.'
             ], 422);
 		}
 		
-		$user = Auth::user();
         $token = $user->createToken('main')->plainTextToken;
         return response(compact('user', 'token'));
 	}

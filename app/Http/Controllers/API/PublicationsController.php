@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\URL;
 
 class PublicationsController extends Controller {	
     public function guestFeed() {	
-		$publications = Publication::all();
+		$publications = Publication::where('moderation_state', '=', true)->get();
 
         return response()->json(['publications' => $publications]);
     }

@@ -62,6 +62,19 @@ class UserController extends Controller {
         ]);
     }
 
+    public function getCurrentUser(Request $request) {
+        $user = $request->user();
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'sex' => $user->sex,
+            'birthday' => $user->birthday,
+            'image' => $user->image,
+            'roles' => $user->getRoleNames(),
+        ]);
+    }
+
 	public function update(UserEditRequest $request, User $user) {
 		$validatedData = $request->validated();
 		
