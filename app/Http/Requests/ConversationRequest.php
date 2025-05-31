@@ -23,7 +23,7 @@ class ConversationRequest extends FormRequest
     {
         return [
             'name' => 'required',
-            'second_user' => 'required'
+            'second_user' => 'required',
         ];
     }
 }

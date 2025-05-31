@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('conversations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('first_user')
-                  ->constrained('users', 'id')
-                  ->onUpdate('cascade')
-                  ->onDelete('cascade');
+                ->constrained('users', 'id')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->foreignId('second_user')
-                  ->constrained('users', 'id')
-                  ->onUpdate('cascade')
-                  ->onDelete('cascade');
+                ->constrained('users', 'id')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->string('name');
             $table->timestamps();
         });

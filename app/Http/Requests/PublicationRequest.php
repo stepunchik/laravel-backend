@@ -24,7 +24,7 @@ class PublicationRequest extends FormRequest
         return [
             'title' => 'required|string|min:3|max:255',
             'text' => 'required|string|min:20',
-			'image' => 'nullable|image',
+            'image' => 'nullable|image',
         ];
     }
 }

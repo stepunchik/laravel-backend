@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Requests\ConversationRequest;
-
-use App\Models\Conversation;
-use App\Models\Message;
-
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\ConversationRequest;
+use App\Models\Conversation;
+use Illuminate\Support\Facades\Auth;
 
 class ConversationsController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         $userId = Auth::id();
 
         $conversations = Conversation::with('latestMessage')
@@ -39,34 +36,52 @@ class ConversationsController extends Controller
         return response()->json(['conversations' => $sorted, 'unread_messages' => $unreadMessages]);
     }
 
-    public function show(Conversation $conversation) {
+    public function show(Conversation $conversation)
+    {
         $userId = Auth::id();
 
         $conversation->messages()
-                ->where('is_read', false)
-                ->where('sender_id', '!=', $userId)
-                ->update(['is_read' => true]);
+            ->where('is_read', false)
+            ->where('sender_id', '!=', $userId)
+            ->update(['is_read' => true]);
 
         return response()->json(['conversation' => $conversation, 'messages' => $conversation->messages()->orderBy('created_at')->get()]);
     }
 
-    public function store(ConversationRequest $request) {
+    public function store(ConversationRequest $request)
+    {
         $validatedData = $request->validated();
 
         $userId = Auth::id();
-		
-		$conversation = Conversation::create([
-			'name' => $validatedData['name'],
+        $secondUserId = $validatedData["second_user"];
+
+        $existingConversation = Conversation::where(function ($query) use ($userId, $secondUserId) {
+                $query->where('first_user', $userId)->where('second_user', $secondUserId);
+            })->orWhere(function ($query) use ($userId, $secondUserId) {
+                $query->where('first_user', $secondUserId)->where('second_user', $userId);
+            })->first();
+
+        if ($existingConversation) {
+            return response()->json(['id' => $existingConversation->id]);
+        }
+
+        $conversation = Conversation::create([
+            'name' => $validatedData["name"],
             'first_user' => $userId,
-			'second_user' => $validatedData['second_user'],
-		]);
-		
-		return response()->json(['id' => $conversation->id]); 
+            'second_user' => $secondUserId,
+        ]);
+
+        return response()->json(['id' => $conversation->id]);
     }
 
-	public function destroy(Conversation $conversation) {		
-		$conversation->delete();
-		
+    public function destroy(Conversation $conversation)
+    {
+        foreach($conversation->messages as $message) {
+            $message->delete();
+        }
+
+        $conversation->delete();
+
         return response()->json(['message' => 'Диалог удален']);
-	}
+    }
 }

@@ -22,7 +22,7 @@ class MessageEditRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'text' => 'required'
+            'text' => 'required',
         ];
     }
 }

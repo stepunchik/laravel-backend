@@ -4,8 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Publication;
 use App\Models\User;
-
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PublicationsSeeder extends Seeder
@@ -19,7 +17,7 @@ class PublicationsSeeder extends Seeder
             'title' => fake()->sentence,
             'text' => fake()->paragraph,
             'image' => fake()->imageUrl(),
-            'user_id' => User::inRandomOrder()->first()->id
+            'user_id' => User::inRandomOrder()->first()->id,
         ]);
     }
 }

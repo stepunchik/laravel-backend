@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sender_id')
-                  ->constrained('users', 'id')
-                  ->onUpdate('cascade')
-                  ->onDelete('cascade');
+                ->constrained('users', 'id')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->foreignId('conversation_id')
-                  ->constrained('conversations', 'id')
-                  ->onUpdate('cascade')
-                  ->onDelete('cascade');
+                ->constrained('conversations', 'id')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->text('text');
             $table->boolean('is_read');
             $table->boolean('deleted_for_sender');

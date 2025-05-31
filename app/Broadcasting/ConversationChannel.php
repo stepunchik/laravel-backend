@@ -2,8 +2,8 @@
 
 namespace App\Broadcasting;
 
-use App\Models\User;
 use App\Models\Conversation;
+use App\Models\User;
 
 class ConversationChannel
 {
@@ -22,7 +22,9 @@ class ConversationChannel
     {
         $conversation = Conversation::find($conversationId);
 
-        if (!$conversation) return false;
+        if (! $conversation) {
+            return false;
+        }
 
         return $conversation->first_user === $user->id || $conversation->second_user === $user->id;
     }

@@ -3,26 +3,25 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-
+use App\Http\Requests\GradeRequest;
 use App\Models\Grade;
 use App\Models\Publication;
-
-use App\Http\Requests\GradeRequest;
-
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 
 class GradesController extends Controller
-{	
-    public function like(Publication $publication) {
+{
+    public function like(Publication $publication)
+    {
         return $this->grade($publication, 1);
     }
 
-    public function dislike(Publication $publication) {
-        return $this->grade($publication, -1);
+    public function dislike(Publication $publication)
+    {
+        return $this->grade($publication, 0);
     }
 
-    private function grade(Publication $publication, int $value) {
+    private function grade(Publication $publication, int $value)
+    {
         $userId = Auth::id();
 
         Grade::create([
@@ -34,8 +33,9 @@ class GradesController extends Controller
         return response()->json(['message' => 'Оценка добавлена']);
     }
 
-    public function update(GradeRequest $request, Publication $publication) {
-		$validatedData = $request->validated();
+    public function update(GradeRequest $request, Publication $publication)
+    {
+        $validatedData = $request->validated();
 
         $userId = Auth::id();
 
@@ -46,14 +46,14 @@ class GradesController extends Controller
         return response()->json(['message' => 'Оценка обновлена']);
     }
 
-	public function destroy(Publication $publication) {		
+    public function destroy(Publication $publication)
+    {
         $userId = Auth::id();
 
-		Grade::where('user_id', $userId)
-                        ->where('publication_id', $publication->id)
-                        ->delete();
-		
-        return response()->json(['message' => 'Оценка удалена']);
-	}
+        Grade::where('user_id', $userId)
+            ->where('publication_id', $publication->id)
+            ->delete();
 
+        return response()->json(['message' => 'Оценка удалена']);
+    }
 }

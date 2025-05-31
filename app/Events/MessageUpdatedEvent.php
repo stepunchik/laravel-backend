@@ -3,10 +3,7 @@
 namespace App\Events;
 
 use App\Models\Message;
-
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -34,11 +31,11 @@ class MessageUpdatedEvent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         $conversation = $this->message->conversation;
-        
+
         return [
-            new PrivateChannel('conversation.' . $this->message->conversation_id),
-            new PrivateChannel('user.' . $conversation->first_user),
-            new PrivateChannel('user.' . $conversation->second_user),
+            new PrivateChannel('conversation.'.$this->message->conversation_id),
+            new PrivateChannel('user.'.$conversation->first_user),
+            new PrivateChannel('user.'.$conversation->second_user),
         ];
     }
 
@@ -50,7 +47,7 @@ class MessageUpdatedEvent implements ShouldBroadcast
     public function broadcastWith(): array
     {
         return [
-            'message' => $this->message
+            'message' => $this->message,
         ];
     }
 }

@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('image');
             $table->boolean('moderation_state')->default(false);
             $table->foreignId('user_id')
-                  ->constrained('users', 'id')
-                  ->onUpdate('cascade')
-                  ->onDelete('cascade');
+                ->constrained('users', 'id')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }

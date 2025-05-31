@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Conversation extends Model
 {
@@ -18,11 +18,13 @@ class Conversation extends Model
         'second_user',
     ];
 
-    public function messages(): HasMany {
+    public function messages(): HasMany
+    {
         return $this->hasMany(Message::class);
     }
 
-    public function latestMessage() {
+    public function latestMessage()
+    {
         return $this->hasOne(Message::class)->latestOfMany();
     }
 }

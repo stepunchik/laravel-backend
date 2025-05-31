@@ -2,53 +2,54 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\Message;
+use App\Events\MessageDeletedEvent;
 use App\Events\MessageSentEvent;
 use App\Events\MessageUpdatedEvent;
-use App\Events\MessageDeletedEvent;
-use App\Http\Requests\MessageRequest;
-use App\Http\Requests\MessageEditRequest;
-
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\MessageEditRequest;
+use App\Http\Requests\MessageRequest;
+use App\Models\Message;
+use Illuminate\Support\Facades\Auth;
 
 class MessagesController extends Controller
 {
-    public function store(MessageRequest $request) {
-		logger($request->all());   
+    public function store(MessageRequest $request)
+    {
+        logger($request->all());
         $validatedData = $request->validated();
 
         $userId = Auth::id();
-		$user = Auth::user();
+        $user = Auth::user();
 
-		$message = Message::create([
-			'sender_id' => $userId,
-            'conversation_id' => (int)$validatedData['conversation_id'],
-			'text' => $validatedData['text'],
-			'is_read' => false,
-		]);
+        $message = Message::create([
+            'sender_id' => $userId,
+            'conversation_id' => (int) $validatedData['conversation_id'],
+            'text' => $validatedData['text'],
+            'is_read' => false,
+        ]);
 
-		broadcast(new MessageSentEvent($message, $userId))->toOthers();
-		
-		return response()->json(['message' => $message]); 
+        broadcast(new MessageSentEvent($message, $userId))->toOthers();
+
+        return response()->json(['message' => $message]);
     }
 
-	public function update(MessageEditRequest $request, Message $message) {
-		$validatedData = $request->validated();
-		
-		$message->update($validatedData);
+    public function update(MessageEditRequest $request, Message $message)
+    {
+        $validatedData = $request->validated();
 
-		broadcast(new MessageUpdatedEvent($message))->toOthers();
-		
-		return response()->json(['message' => $message]);
-	}
+        $message->update($validatedData);
 
-	public function destroy(Message $message) {		
-		$message->delete();
-		
-		broadcast(new MessageDeletedEvent($message->id, $message->conversation_id))->toOthers();
+        broadcast(new MessageUpdatedEvent($message))->toOthers();
 
-		return response()->json(['message' => 'Сообщение удалено']);
-	}
+        return response()->json(['message' => $message]);
+    }
+
+    public function destroy(Message $message)
+    {
+        $message->delete();
+
+        broadcast(new MessageDeletedEvent($message->id, $message->conversation_id))->toOthers();
+
+        return response()->json(['message' => 'Сообщение удалено']);
+    }
 }

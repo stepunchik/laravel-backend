@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('grades', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')
-                  ->constrained('users', 'id')
-                  ->onUpdate('cascade')
-                  ->onDelete('cascade');
+                ->constrained('users', 'id')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->foreignId('publication_id')
-                  ->constrained('publications', 'id')
-                  ->onUpdate('cascade')
-                  ->onDelete('cascade');
+                ->constrained('publications', 'id')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->integer('value');
             $table->timestamps();
         });

@@ -3,21 +3,18 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-
-use App\Models\User;
-use App\Models\Grade;
-use App\Models\Publication;
-
 use App\Http\Requests\UserEditRequest;
-
-use Illuminate\Support\Facades\DB;
+use App\Models\Publication;
+use App\Models\User;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
-class UserController extends Controller {
-    public function getTop() {
+class UserController extends Controller
+{
+    public function getTop()
+    {
         $topUsers = DB::table('grades')
             ->join('publications', 'grades.publication_id', '=', 'publications.id')
             ->join('users', 'publications.user_id', '=', 'users.id')
@@ -31,7 +28,8 @@ class UserController extends Controller {
         return response()->json(['top' => $topUsers]);
     }
 
-    public function getLastWeekTop() {
+    public function getLastWeekTop()
+    {
         $topUsers = DB::table('grades')
             ->join('publications', 'grades.publication_id', '=', 'publications.id')
             ->join('users', 'publications.user_id', '=', 'users.id')
@@ -46,24 +44,27 @@ class UserController extends Controller {
         return response()->json(['last_week_top' => $topUsers]);
     }
 
-    public function show(User $user) {
+    public function show(User $user)
+    {
         $likesQuantity = DB::table('grades')
-                ->join('publications', 'grades.publication_id', '=', 'publications.id')
-                ->where('publications.user_id', '=', $user->id)
-                ->where('grades.value', '=', 1)
-                ->count();
+            ->join('publications', 'grades.publication_id', '=', 'publications.id')
+            ->where('publications.user_id', '=', $user->id)
+            ->where('grades.value', '=', 1)
+            ->count();
         $userPublications = Publication::where('user_id', $user->id)->get();
         $publicationsQuantity = count($userPublications);
 
         return response()->json([
-            'user' => $user, 
-            'likes_quantity' => $likesQuantity, 
+            'user' => $user,
+            'likes_quantity' => $likesQuantity,
             'publications_quantity' => $publicationsQuantity,
         ]);
     }
 
-    public function getCurrentUser(Request $request) {
+    public function getCurrentUser(Request $request)
+    {
         $user = $request->user();
+
         return response()->json([
             'id' => $user->id,
             'name' => $user->name,
@@ -75,24 +76,25 @@ class UserController extends Controller {
         ]);
     }
 
-	public function update(UserEditRequest $request, User $user) {
-		$validatedData = $request->validated();
-		
-		if ($request->hasFile('image')) {
-			if ($user->image) {
-				$deletingPath = substr($user['image'], 29, strlen($user['image']));
-				Storage::delete('public/' . $deletingPath);
-			}
+    public function update(UserEditRequest $request, User $user)
+    {
+        $validatedData = $request->validated();
 
-			$path = $request->file('image')->store('users', 'public');
-			$imageUrl = URL::to('/') . Storage::url($path);
-			$validatedData['image'] = $imageUrl;
-		} else {
-			$validatedData['image'] = $user->image;
-		}
+        if ($request->hasFile('image')) {
+            if ($user->image) {
+                $deletingPath = substr($user['image'], 29, strlen($user['image']));
+                Storage::delete('public/'.$deletingPath);
+            }
 
-		$user->update($validatedData);
-		
-		return response()->json(['test' => $validatedData, 'user' => $user]);
-	}
+            $path = $request->file('image')->store('users', 'public');
+            $imageUrl = URL::to('/').Storage::url($path);
+            $validatedData['image'] = $imageUrl;
+        } else {
+            $validatedData['image'] = $user->image;
+        }
+
+        $user->update($validatedData);
+
+        return response()->json(['user' => $user]);
+    }
 }

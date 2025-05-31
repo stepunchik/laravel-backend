@@ -23,7 +23,7 @@ class MessageRequest extends FormRequest
     {
         return [
             'text' => 'required|max:255',
-            'conversation_id' => 'required'
+            'conversation_id' => 'required',
         ];
     }
 }
