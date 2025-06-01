@@ -11,12 +11,12 @@ class ConversationsController extends Controller
 {
     public function index()
     {
-        $userId = Auth::id();
+        $user = Auth::user();
 
-        $conversations = Conversation::with('latestMessage')
-            ->where(function ($query) use ($userId) {
-                $query->where('first_user', $userId)
-                    ->orWhere('second_user', $userId);
+        $conversations = Conversation::with('latestMessage')->with(['firstUser', 'secondUser'])
+            ->where(function ($query) use ($user) {
+                $query->where('first_user', $user->id)
+                    ->orWhere('second_user', $user->id);
             })
             ->get();
 
@@ -24,10 +24,10 @@ class ConversationsController extends Controller
             return optional($conversation->latestMessage)->created_at;
         })->values();
 
-        $unreadMessages = $sorted->mapWithKeys(function ($conversation) use ($userId) {
+        $unreadMessages = $sorted->mapWithKeys(function ($conversation) use ($user) {
             $unreadCount = $conversation->messages
                 ->where('is_read', false)
-                ->where('sender_id', '!=', $userId)
+                ->where('sender_id', '!=', $user->id)
                 ->count();
 
             return [$conversation->id => $unreadCount];
@@ -53,20 +53,20 @@ class ConversationsController extends Controller
         $validatedData = $request->validated();
 
         $userId = Auth::id();
-        $secondUserId = $validatedData["second_user"];
+        $secondUserId = $validatedData['second_user'];
 
         $existingConversation = Conversation::where(function ($query) use ($userId, $secondUserId) {
-                $query->where('first_user', $userId)->where('second_user', $secondUserId);
-            })->orWhere(function ($query) use ($userId, $secondUserId) {
-                $query->where('first_user', $secondUserId)->where('second_user', $userId);
-            })->first();
+            $query->where('first_user', $userId)->where('second_user', $secondUserId);
+        })->orWhere(function ($query) use ($userId, $secondUserId) {
+            $query->where('first_user', $secondUserId)->where('second_user', $userId);
+        })->first();
 
         if ($existingConversation) {
             return response()->json(['id' => $existingConversation->id]);
         }
 
         $conversation = Conversation::create([
-            'name' => $validatedData["name"],
+            'name' => $validatedData['name'],
             'first_user' => $userId,
             'second_user' => $secondUserId,
         ]);
@@ -76,10 +76,6 @@ class ConversationsController extends Controller
 
     public function destroy(Conversation $conversation)
     {
-        foreach($conversation->messages as $message) {
-            $message->delete();
-        }
-
         $conversation->delete();
 
         return response()->json(['message' => 'Диалог удален']);

@@ -52,6 +52,7 @@ Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
     Route::post('/messages/{message}', [MessagesController::class, 'update']);
 
     Route::post('/users/{user}', [UserController::class, 'update']);
+    Route::delete('/users/{user}', [UserController::class, 'destroy']);
 
     Route::post('/publications/{publication}/like', [GradesController::class, 'like']);
     Route::post('/publications/{publication}/dislike', [GradesController::class, 'dislike']);

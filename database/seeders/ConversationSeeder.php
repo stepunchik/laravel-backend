@@ -22,7 +22,6 @@ class ConversationSeeder extends Seeder
             } while ($secondUser === $firstUser);
 
             Conversation::create([
-                'name' => fake()->words(2, true),
                 'first_user' => $firstUser,
                 'second_user' => $secondUser,
             ]);
