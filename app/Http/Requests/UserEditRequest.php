@@ -22,10 +22,10 @@ class UserEditRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|min:2|max:255',
-            'birthday' => 'required|date',
-            'sex' => 'required',
-            'image' => 'required|image',
+            'name' => 'nullable|min:2|max:255',
+            'birthday' => 'nullable|date',
+            'sex' => 'nullable',
+            'image' => 'nullable|image',
         ];
     }
 }

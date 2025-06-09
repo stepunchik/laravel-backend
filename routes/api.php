@@ -24,7 +24,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-Route::get('/publications/guest', [PublicationsController::class, 'guestFeed']);
+Route::get('publications', [PublicationsController::class, 'index']);
 
 Route::get('/user', [UserController::class, 'getCurrentUser']);
 Route::get('/users/top', [UserController::class, 'getTop']);
@@ -43,7 +43,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin'])->group(functi
 });
 
 Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
-    Route::apiResource('/publications', PublicationsController::class)->except('update');
+    Route::apiResource('/publications', PublicationsController::class)->except('update', 'index');
     Route::post('publications/{publication}', [PublicationsController::class, 'update']);
 
     Route::apiResource('/conversations', ConversationsController::class)->except('update', 'create', 'edit');
