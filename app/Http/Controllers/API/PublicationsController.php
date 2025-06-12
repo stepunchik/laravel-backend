@@ -18,13 +18,18 @@ class PublicationsController extends Controller
     {
         $userId = Auth::id();
 
-        $publications = Publication::all();
+        $publications = Publication::paginate(10);
 
         $gradedPublications = $userId
-            ? Grade::where('user_id', $userId)->get()
-            : [];
+            ? Grade::where('user_id', $userId)
+                ->whereIn('publication_id', $publications->pluck('id'))
+                ->get()
+            : collect();
 
-        return response()->json(['publications' => $publications, 'gradedPublications' => $gradedPublications]);
+        return response()->json([
+            'publications' => $publications,
+            'gradedPublications' => $gradedPublications,
+        ]);
     }
 
     public function show(Publication $publication)
@@ -34,9 +39,13 @@ class PublicationsController extends Controller
 
     public function getUserPublications(User $user)
     {
-        $publications = $user->publications;
+        $publications = $user->publications()->paginate(10);
 
-        $gradedPublications = Grade::where('user_id', Auth::id())->get();
+        $gradedPublications = Auth::id()
+            ? Grade::where('user_id', Auth::id())
+                ->whereIn('publication_id', $publications->pluck('id'))
+                ->get()
+            : collect();
 
         return response()->json([
             'publications' => $publications,

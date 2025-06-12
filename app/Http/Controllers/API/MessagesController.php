@@ -26,6 +26,7 @@ class MessagesController extends Controller
             'conversation_id' => (int) $validatedData['conversation_id'],
             'text' => $validatedData['text'],
             'is_read' => false,
+            'created_at' => now(),
         ]);
 
         broadcast(new MessageSentEvent($message, $userId))->toOthers();
@@ -52,4 +53,5 @@ class MessagesController extends Controller
 
         return response()->json(['message' => 'Сообщение удалено']);
     }
+
 }

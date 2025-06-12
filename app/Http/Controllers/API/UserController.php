@@ -98,11 +98,12 @@ class UserController extends Controller
         return response()->json(['user' => $user]);
     }
 
-    public function destroy(Request $request, User $user) {
+    public function destroy(Request $request, User $user)
+    {
         $requestUser = $request->user();
         $requestUser->currentAccessToken()->delete();
 
-        if (!str_contains($user['image'], 'default.jpg')) {
+        if (! str_contains($user['image'], 'default.jpg')) {
             $deletingPath = substr($user['image'], 29, strlen($user['image']));
             Storage::delete('public/'.$deletingPath);
         }

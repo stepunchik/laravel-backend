@@ -45,7 +45,11 @@ class ConversationsController extends Controller
             ->where('sender_id', '!=', $userId)
             ->update(['is_read' => true]);
 
-        return response()->json(['conversation' => $conversation, 'messages' => $conversation->messages()->orderBy('created_at')->get()]);
+        $messages = $conversation->messages()
+            ->orderBy('created_at', 'desc')
+            ->paginate(50);
+
+        return response()->json(['conversation' => $conversation, 'messages' => $messages]);
     }
 
     public function store(ConversationRequest $request)

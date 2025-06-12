@@ -64,10 +64,15 @@ class AdminController extends Controller
         $publication->delete();
     }
 
-    public function destroyUser(User $user)
+    public function destroyUser(Request $request, User $user)
     {
-        $deletingPath = substr($user['image'], 29, strlen($user['image']));
-        Storage::delete('public/'.$deletingPath);
+        $requestUser = $request->user();
+        $requestUser->currentAccessToken()->delete();
+
+        if (! str_contains($user['image'], 'default.jpg')) {
+            $deletingPath = substr($user['image'], 29, strlen($user['image']));
+            Storage::delete('public/'.$deletingPath);
+        }
 
         $user->delete();
     }
