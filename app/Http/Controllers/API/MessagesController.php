@@ -53,5 +53,4 @@ class MessagesController extends Controller
 
         return response()->json(['message' => 'Сообщение удалено']);
     }
-
 }

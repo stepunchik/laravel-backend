@@ -22,7 +22,6 @@ class ConversationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required',
             'second_user' => 'required',
         ];
     }

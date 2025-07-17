@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Events\MessageReadEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ConversationRequest;
 use App\Models\Conversation;
@@ -36,21 +37,33 @@ class ConversationsController extends Controller
         return response()->json(['conversations' => $sorted, 'unread_messages' => $unreadMessages]);
     }
 
-    public function show(Conversation $conversation)
-    {
-        $userId = Auth::id();
+public function show(Conversation $conversation)
+{
+    $userId = Auth::id();
 
+    // Получаем ID непрочитанных сообщений перед обновлением
+    $unreadMessages = $conversation->messages()
+        ->where('is_read', false)
+        ->where('sender_id', '!=', $userId)
+        ->pluck('id')
+        ->toArray();
+
+    // Обновляем статус сообщений
+    if (!empty($unreadMessages)) {
         $conversation->messages()
-            ->where('is_read', false)
-            ->where('sender_id', '!=', $userId)
+            ->whereIn('id', $unreadMessages)
             ->update(['is_read' => true]);
-
-        $messages = $conversation->messages()
-            ->orderBy('created_at', 'desc')
-            ->paginate(50);
-
-        return response()->json(['conversation' => $conversation, 'messages' => $messages]);
+            
+        // Отправляем событие с ID сообщений, которые были прочитаны
+        broadcast(new MessageReadEvent($conversation->id, $unreadMessages))->toOthers();
     }
+
+    $messages = $conversation->messages()
+        ->orderBy('created_at', 'desc')
+        ->paginate(50);
+
+    return response()->json(['conversation' => $conversation, 'messages' => $messages]);
+}
 
     public function store(ConversationRequest $request)
     {
@@ -70,7 +83,6 @@ class ConversationsController extends Controller
         }
 
         $conversation = Conversation::create([
-            'name' => $validatedData['name'],
             'first_user' => $userId,
             'second_user' => $secondUserId,
         ]);
